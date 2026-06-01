@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>CineTrack — Editar Item</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="auth-page">
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-logo">✏️ Editar</div>
+        <h2 class="auth-title" th:text="${item.titulo}"></h2>
+
+        <!-- Igual ao formupdcliente.html do repositório: PathVariable + th:object + th:field -->
+        <form action="#" th:action="'/lista/' + ${id} + '/editar'" method="post" th:object="${item}">
+
+            Status:
+            <select th:field="*{status}" class="input-select">
+                <option value="quero assistir">Quero assistir</option>
+                <option value="assistindo">Assistindo</option>
+                <option value="assistido">Assistido</option>
+            </select><br>
+
+            Nota:
+            <textarea th:field="*{nota}" class="input-textarea"
+                      placeholder="Adicionar uma nota..."></textarea><br>
+
+            <input type="submit" value="Salvar" class="btn-submit">
+            <a th:href="@{/lista}" class="btn-limpar">Cancelar</a>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

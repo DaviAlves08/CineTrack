@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>CineTrack — Catálogo</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="navbar-brand">🎬 CineTrack</div>
+    <div class="navbar-links">
+        <a th:href="@{/catalogo}" class="nav-link active">Catálogo</a>
+        <a th:href="@{/lista}"    class="nav-link">Minha Lista</a>
+        <span class="nav-user"   th:text="${usuario.nome}"></span>
+        <a th:href="@{/logout}"   class="btn-logout">Sair</a>
+    </div>
+</nav>
+
+<!-- BUSCA -->
+<section class="search-hero">
+    <form action="#" th:action="@{/catalogo}" method="get" class="search-form">
+        <input class="search-input" type="text" name="busca"
+               th:value="${busca}" placeholder="Buscar filmes e séries...">
+        <input type="submit" value="Buscar" class="btn-submit">
+        <a th:if="${busca != null}" th:href="@{/catalogo}" class="btn-limpar">Limpar</a>
+    </form>
+</section>
+
+<!-- GRID -->
+<main class="container">
+    <h2 class="section-title"
+        th:text="${busca != null ? 'Resultados para: ' + busca : '🔥 Populares agora'}">
+    </h2>
+
+    <p th:if="${filmes.isEmpty()}" class="empty-msg">Nenhum resultado encontrado.</p>
+
+    <div class="grid">
+        <article class="card"
+                 th:each="f : ${filmes}"
+                 th:data-id="${f.id}"
+                 th:data-titulo="${f.titulo}"
+                 th:data-tipo="${f.tipo}"
+                 th:data-poster="${f.posterPath}"
+                 th:data-desc="${f.descricao}"
+                 th:data-nota="${f.nota}"
+                 th:data-ano="${f.ano}"
+                 th:onclick="|abrirModal(${f.id})|">
+
+            <div class="card-poster">
+                <img th:if="${f.posterPath != ''}"
+                     th:src="'https://image.tmdb.org/t/p/w300' + ${f.posterPath}"
+                     th:alt="${f.titulo}" loading="lazy">
+                <div th:if="${f.posterPath == ''}" class="no-poster">🎬</div>
+                <span class="badge badge-tipo" th:text="${f.tipo == 'movie' ? 'Filme' : 'Série'}"></span>
+                <span th:if="${idsNaLista.contains(f.id)}" class="badge badge-check">✓</span>
+            </div>
+
+            <div class="card-info">
+                <p class="card-titulo" th:text="${f.titulo}"></p>
+                <p class="card-meta">
+                    <span th:text="${f.ano}"></span> ·
+                    <span class="star">⭐ <span th:text="${#numbers.formatDecimal(f.nota,1,1)}"></span></span>
+                </p>
+            </div>
+        </article>
+    </div>
+</main>
+
+<!-- MODAL -->
+<div id="modal" class="modal" style="display:none;" onclick="fecharSeForFundo(event)">
+    <div class="modal-box">
+        <button class="modal-close" onclick="fecharModal()">✕</button>
+        <div class="modal-body">
+            <img id="m-poster" src="" alt="" class="modal-poster">
+            <div class="modal-info">
+                <span id="m-badge" class="badge badge-tipo"></span>
+                <h2 id="m-titulo"></h2>
+                <p  id="m-meta"  class="modal-meta"></p>
+                <p  id="m-desc"  class="modal-desc"></p>
+
+                <form action="#" th:action="@{/catalogo/adicionar}" method="post" id="form-add">
+                    <input type="hidden" id="in-id"     name="tmdbId">
+                    <input type="hidden" id="in-titulo" name="titulo">
+                    <input type="hidden" id="in-tipo"   name="tipo">
+                    <input type="hidden" id="in-poster" name="posterPath">
+                    <input type="submit" id="btn-add" value="+ Adicionar à lista" class="btn-submit btn-full">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const idsNaLista = new Set(/*[[${idsNaLista}]]*/ []);
+
+    function abrirModal(id) {
+        const card = document.querySelector(`[data-id='${id}']`);
+
+        document.getElementById('m-titulo').textContent = card.dataset.titulo;
+        document.getElementById('m-badge').textContent  = card.dataset.tipo === 'movie' ? 'Filme' : 'Série';
+        document.getElementById('m-meta').textContent   = card.dataset.ano + '  ·  ⭐ ' + parseFloat(card.dataset.nota).toFixed(1);
+        document.getElementById('m-desc').textContent   = card.dataset.desc || 'Sem descrição.';
+
+        const poster = document.getElementById('m-poster');
+        if (card.dataset.poster) {
+            poster.src = 'https://image.tmdb.org/t/p/w500' + card.dataset.poster;
+            poster.style.display = 'block';
+        } else {
+            poster.style.display = 'none';
+        }
+
+        document.getElementById('in-id').value     = id;
+        document.getElementById('in-titulo').value = card.dataset.titulo;
+        document.getElementById('in-tipo').value   = card.dataset.tipo;
+        document.getElementById('in-poster').value = card.dataset.poster;
+
+        const btn = document.getElementById('btn-add');
+        if (idsNaLista.has(id)) {
+            btn.value    = '✓ Já está na sua lista';
+            btn.disabled = true;
+        } else {
+            btn.value    = '+ Adicionar à lista';
+            btn.disabled = false;
+        }
+
+        document.getElementById('modal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function fecharModal() {
+        document.getElementById('modal').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    function fecharSeForFundo(e) {
+        if (e.target === document.getElementById('modal')) fecharModal();
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharModal(); });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>CineTrack — Minha Lista</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="navbar-brand">🎬 CineTrack</div>
+    <div class="navbar-links">
+        <a th:href="@{/filmes}"  class="nav-link">🎬 Filmes</a>
+        <a th:href="@{/series}"  class="nav-link">📺 Séries</a>
+        <a th:href="@{/lista}"   class="nav-link active">📋 Minha Lista</a>
+        <a th:href="@{/perfil}"  class="nav-link">👤 Perfil</a>
+        <span class="nav-user"   th:text="${usuario.nome}"></span>
+        <a th:href="@{/logout}"   class="btn-logout">Sair</a>
+    </div>
+</nav>
+
+<main class="container">
+    <div class="lista-header">
+        <h2 class="section-title">📋 Minha Lista</h2>
+        <a th:href="@{/catalogo}" class="btn-limpar">+ Adicionar mais</a>
+    </div>
+
+    <p th:if="${itens.isEmpty()}" class="empty-msg">
+        Sua lista está vazia. <a th:href="@{/catalogo}">Explorar catálogo</a>
+    </p>
+
+    <div class="grid" th:unless="${itens.isEmpty()}">
+        <article class="card card-lista" th:each="item : ${itens}">
+
+            <div class="card-poster">
+                <img th:if="${item.posterPath != null and !item.posterPath.isEmpty()}"
+                     th:src="'https://image.tmdb.org/t/p/w300' + ${item.posterPath}"
+                     th:alt="${item.titulo}" loading="lazy">
+                <div th:if="${item.posterPath == null or item.posterPath.isEmpty()}" class="no-poster">🎬</div>
+                <span class="badge badge-tipo" th:text="${item.tipo == 'movie' ? 'Filme' : 'Série'}"></span>
+            </div>
+
+            <div class="card-info">
+                <p class="card-titulo" th:text="${item.titulo}"></p>
+
+                <span class="status-badge"
+                      th:classappend="${item.status == 'assistido'  ? ' status-done'     :
+                                        item.status == 'assistindo' ? ' status-watching' :
+                                                                       ' status-want'}"
+                      th:text="${item.status}">
+                </span>
+
+                <p class="nota-texto"
+                   th:if="${item.nota != null and !item.nota.isEmpty()}"
+                   th:text="'📝 ' + ${item.nota}">
+                </p>
+
+                <div class="card-actions">
+                    <!-- Editar → vai para formeditar.html (padrão PathVariable do repositório) -->
+                    <a th:href="'/lista/' + ${item.id} + '/editar'" class="btn-acao">✏️ Editar</a>
+
+                    <!-- Excluir -->
+                    <form action="#"
+                          th:action="'/lista/' + ${item.id} + '/excluir'"
+                          method="post" style="display:inline">
+                        <input type="submit" value="🗑 Remover" class="btn-acao btn-danger"
+                               onclick="return confirm('Remover da lista?')">
+                    </form>
+                </div>
+            </div>
+        </article>
+    </div>
+</main>
+
+</body>
+</html>

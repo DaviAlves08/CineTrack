@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>CineTrack — Login</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="auth-page">
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-logo">🎬 CineTrack</div>
+        <h2 class="auth-title">Entrar na sua conta</h2>
+
+        <div th:if="${param.cadastrado}" class="alert alert-success">Conta criada! Faça login.</div>
+        <div th:if="${erro}" class="alert alert-error" th:text="${erro}"></div>
+
+        <form action="#" th:action="@{/login}" method="post">
+            E-mail: <input type="email"    name="email" required><br>
+            Senha:  <input type="password" name="senha" required>
+            <input type="submit" value="Entrar" class="btn-submit">
+        </form>
+
+        <p class="auth-footer">Não tem conta? <a th:href="@{/registro}">Cadastre-se</a></p>
+    </div>
+</div>
+
+</body>
+</html>

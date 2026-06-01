@@ -1,0 +1,23 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    platform: postgres
+    url: jdbc:postgresql://127.0.0.1:5432/cinetrack_db
+    username: postgres
+    password: root
+    driverClassName: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema-postgresql.sql
+
+tmdb:
+  api:
+    key: ca712eae0c0692883fabdfe0a1d96910

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>CineTrack — Séries</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-brand">🎬 CineTrack</div>
+    <div class="navbar-links">
+        <a th:href="@{/filmes}"  class="nav-link">🎬 Filmes</a>
+        <a th:href="@{/series}"  class="nav-link active">📺 Séries</a>
+        <a th:href="@{/lista}"   class="nav-link">📋 Minha Lista</a>
+        <a th:href="@{/perfil}"  class="nav-link">👤 Perfil</a>
+        <a th:href="@{/logout}"  class="btn-logout">Sair</a>
+    </div>
+</nav>
+
+<!-- FILTROS -->
+<div class="filtros-bar">
+    <a th:href="@{/series(filtro='popular')}"
+       th:classappend="${filtro == 'popular'} ? ' ativo'" class="filtro-btn">🔥 Populares</a>
+    <a th:href="@{/series(filtro='top_rated')}"
+       th:classappend="${filtro == 'top_rated'} ? ' ativo'" class="filtro-btn">⭐ Mais Votadas</a>
+    <a th:href="@{/series(filtro='on_the_air')}"
+       th:classappend="${filtro == 'on_the_air'} ? ' ativo'" class="filtro-btn">📡 No Ar</a>
+    <a th:href="@{/series(filtro='airing_today')}"
+       th:classappend="${filtro == 'airing_today'} ? ' ativo'" class="filtro-btn">📅 Hoje</a>
+</div>
+
+<!-- BUSCA -->
+<section class="search-hero">
+    <form action="#" th:action="@{/series}" method="get" class="search-form">
+        <input class="search-input" type="text" name="busca"
+               th:value="${busca}" placeholder="Buscar séries...">
+        <input type="submit" value="Buscar" class="btn-submit">
+        <a th:if="${busca != null}" th:href="@{/series}" class="btn-limpar">Limpar</a>
+    </form>
+</section>
+
+<!-- GRID -->
+<main class="container">
+    <h2 class="section-title"
+        th:text="${busca != null ? 'Resultados para: ' + busca :
+                   filtro == 'top_rated'    ? '⭐ Séries Mais Votadas' :
+                   filtro == 'on_the_air'   ? '📡 Séries No Ar' :
+                   filtro == 'airing_today' ? '📅 Episódios Hoje' :
+                                              '🔥 Séries Populares'}">
+    </h2>
+
+    <p th:if="${itens.isEmpty()}" class="empty-msg">Nenhum resultado encontrado.</p>
+
+    <div class="grid">
+        <article class="card"
+                 th:each="f : ${itens}"
+                 th:data-id="${f.id}"
+                 th:data-titulo="${f.titulo}"
+                 th:data-tipo="${f.tipo}"
+                 th:data-poster="${f.posterPath}"
+                 th:data-desc="${f.descricao}"
+                 th:data-nota="${f.nota}"
+                 th:data-ano="${f.ano}"
+                 th:onclick="|abrirModal(${f.id})|">
+
+            <div class="card-poster">
+                <img th:if="${f.posterPath != ''}"
+                     th:src="'https://image.tmdb.org/t/p/w300' + ${f.posterPath}"
+                     th:alt="${f.titulo}" loading="lazy">
+                <div th:if="${f.posterPath == ''}" class="no-poster">📺</div>
+                <span class="badge badge-serie">Série</span>
+                <span th:if="${idsNaLista.contains(f.id)}" class="badge badge-check">✓</span>
+            </div>
+
+            <div class="card-info">
+                <p class="card-titulo" th:text="${f.titulo}"></p>
+                <p class="card-meta">
+                    <span th:text="${f.ano}"></span> ·
+                    <span class="star">⭐ <span th:text="${#numbers.formatDecimal(f.nota,1,1)}"></span></span>
+                </p>
+            </div>
+        </article>
+    </div>
+</main>
+
+<!-- MODAL -->
+<div id="modal" class="modal" style="display:none;" onclick="fecharSeForFundo(event)">
+    <div class="modal-box">
+        <button class="modal-close" onclick="fecharModal()">✕</button>
+        <div class="modal-body">
+            <img id="m-poster" src="" alt="" class="modal-poster">
+            <div class="modal-info">
+                <span class="badge badge-serie" style="position:static;margin-bottom:.5rem">Série</span>
+                <h2 id="m-titulo"></h2>
+                <p  id="m-meta"  class="modal-meta"></p>
+                <p  id="m-desc"  class="modal-desc"></p>
+
+                <form action="#" th:action="@{/adicionar}" method="post" id="form-add">
+                    <input type="hidden" id="in-id"     name="tmdbId">
+                    <input type="hidden" id="in-titulo" name="titulo">
+                    <input type="hidden" name="tipo"    value="tv">
+                    <input type="hidden" id="in-poster" name="posterPath">
+                    <input type="hidden" name="origem"  value="/series">
+                    <input type="submit" id="btn-add" value="+ Adicionar à lista" class="btn-submit btn-full">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const idsNaLista = new Set(/*[[${idsNaLista}]]*/ []);
+
+    function abrirModal(id) {
+        const card = document.querySelector(`[data-id='${id}']`);
+        document.getElementById('m-titulo').textContent = card.dataset.titulo;
+        document.getElementById('m-meta').textContent   = card.dataset.ano + '  ·  ⭐ ' + parseFloat(card.dataset.nota).toFixed(1);
+        document.getElementById('m-desc').textContent   = card.dataset.desc || 'Sem descrição.';
+
+        const poster = document.getElementById('m-poster');
+        if (card.dataset.poster) {
+            poster.src = 'https://image.tmdb.org/t/p/w500' + card.dataset.poster;
+            poster.style.display = 'block';
+        } else { poster.style.display = 'none'; }
+
+        document.getElementById('in-id').value     = id;
+        document.getElementById('in-titulo').value = card.dataset.titulo;
+        document.getElementById('in-poster').value = card.dataset.poster;
+
+        const btn = document.getElementById('btn-add');
+        btn.value    = idsNaLista.has(id) ? '✓ Já está na sua lista' : '+ Adicionar à lista';
+        btn.disabled = idsNaLista.has(id);
+
+        document.getElementById('modal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function fecharModal() {
+        document.getElementById('modal').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    function fecharSeForFundo(e) {
+        if (e.target === document.getElementById('modal')) fecharModal();
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharModal(); });
+</script>
+
+</body>
+</html>
