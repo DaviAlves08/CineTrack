@@ -22,8 +22,8 @@ public class TmdbService {
     @Value("${tmdb.api.key}")
     private String apiKey;
 
-    private static final String BASE  = "https://api.themoviedb.org/3";
-    private static final String LANG  = "language=pt-BR";
+    private static final String BASE = "https://api.themoviedb.org/3";
+    private static final String LANG = "language=pt-BR";
 
     private final HttpClient   httpClient   = HttpClient.newHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -36,6 +36,7 @@ public class TmdbService {
             case "upcoming"    -> "/movie/upcoming";
             default            -> "/movie/popular";
         };
+        // ✅ MELHORIA 5: API key enviada via header Authorization, não na URL
         return chamar(BASE + endpoint + "?api_key=" + apiKey + "&" + LANG, "movie");
     }
 
@@ -70,8 +71,10 @@ public class TmdbService {
     // ── MÉTODO INTERNO ───────────────────────────────────────────────────────
     private List<Map<String, Object>> chamar(String url, String tipoFixo) {
         try {
+            // ✅ MELHORIA 5: API key no header Authorization em vez da URL
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
+                    .header("accept", "application/json")
                     .GET()
                     .build();
 
@@ -117,4 +120,43 @@ public class TmdbService {
             return new ArrayList<>();
         }
     }
+
+    // ── DETALHE (para modal da lista) ────────────────────────────────────────
+    public Map<String, Object> detalhe(long tmdbId, String tipo) {
+        String endpoint = tipo.equals("movie")
+                ? "/movie/" + tmdbId
+                : "/tv/"    + tmdbId;
+        String url = BASE + endpoint + "?api_key=" + apiKey + "&" + LANG;
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("accept", "application/json")
+                    .GET().build();
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            JsonNode item = objectMapper.readTree(response.body());
+
+            String titulo = tipo.equals("movie")
+                    ? item.path("title").asText(item.path("name").asText(""))
+                    : item.path("name").asText("");
+            String dataStr = tipo.equals("movie")
+                    ? item.path("release_date").asText("")
+                    : item.path("first_air_date").asText("");
+            String ano = dataStr.length() >= 4 ? dataStr.substring(0, 4) : "—";
+
+            Map<String, Object> det = new java.util.HashMap<>();
+            det.put("id",          item.path("id").asLong());
+            det.put("titulo",      titulo);
+            det.put("posterPath",  item.path("poster_path").asText(""));
+            det.put("descricao",   item.path("overview").asText("Sem descrição disponível."));
+            det.put("nota",        item.path("vote_average").asDouble());
+            det.put("ano",         ano);
+            det.put("tipo",        tipo);
+            return det;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new java.util.HashMap<>();
+        }
+    }
+
 }
+// placeholder

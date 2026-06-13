@@ -26,8 +26,8 @@ public class MinhaListaDAO {
     }
 
     public void inserir(MinhaLista item) {
-        String sql = "INSERT INTO minha_lista(usuario_id, tmdb_id, titulo, tipo, poster_path, status, nota) VALUES(?,?,?,?,?,?,?)";
-        Object[] obj = new Object[7];
+        String sql = "INSERT INTO minha_lista(usuario_id, tmdb_id, titulo, tipo, poster_path, status, nota, avaliacao) VALUES(?,?,?,?,?,?,?,?)";
+        Object[] obj = new Object[8];
         obj[0] = item.getUsuarioId();
         obj[1] = item.getTmdbId();
         obj[2] = item.getTitulo();
@@ -35,21 +35,25 @@ public class MinhaListaDAO {
         obj[4] = item.getPosterPath();
         obj[5] = item.getStatus();
         obj[6] = item.getNota();
+        obj[7] = item.getAvaliacao();
         jdbc.update(sql, obj);
     }
 
     public void atualizar(int id, MinhaLista novo) {
-        String sql = "UPDATE minha_lista SET status = ?, nota = ? WHERE id = ?";
-        Object[] obj = new Object[3];
+        String sql = "UPDATE minha_lista SET status = ?, nota = ?, avaliacao = ? WHERE id = ?";
+        Object[] obj = new Object[4];
         obj[0] = novo.getStatus();
         obj[1] = novo.getNota();
-        obj[2] = id;
+        obj[2] = novo.getAvaliacao();
+        obj[3] = id;
         jdbc.update(sql, obj);
     }
 
     public void excluir(int id) {
         String sql = "DELETE FROM minha_lista WHERE id = ?";
-        jdbc.update(sql, id);
+        Object[] obj = new Object[1];
+        obj[0] = id;
+        jdbc.update(sql, obj);
     }
 
     public MinhaLista obterPorId(int id) {
@@ -71,7 +75,10 @@ public class MinhaListaDAO {
 
     public boolean existePorUsuarioETmdb(int usuarioId, long tmdbId) {
         String sql = "SELECT COUNT(*) FROM minha_lista WHERE usuario_id = ? AND tmdb_id = ?";
-        Integer count = jdbc.queryForObject(sql, Integer.class, usuarioId, tmdbId);
+        Object[] obj = new Object[2];
+        obj[0] = usuarioId;
+        obj[1] = tmdbId;
+        Integer count = jdbc.queryForObject(sql, Integer.class, obj);
         return count != null && count > 0;
     }
 }

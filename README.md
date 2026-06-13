@@ -1,79 +1,62 @@
 # 🎬 CineTrack
 
-Catálogo de filmes e séries com lista pessoal.
-**Stack:** Spring Boot 4 · JdbcTemplate · Thymeleaf · PostgreSQL · TMDB API
+CineTrack é uma aplicação web para catalogar filmes e séries, organizar uma lista pessoal de "quero assistir / assistindo / assistido" e avaliar cada título com comentários e notas em estrelas.
+
+Os dados de filmes e séries (poster, descrição, nota, ano) são obtidos em tempo real através da API pública do **TMDB (The Movie Database)**.
 
 ---
 
-## ⚙️ Setup
+## ✨ Funcionalidades
 
-### 1. Criar o banco no PostgreSQL
-```sql
-CREATE DATABASE cinetrack_db;
-```
-> As tabelas são criadas automaticamente pelo `schema-postgresql.sql` ao iniciar.
+- Cadastro e login de usuários, com senhas criptografadas (BCrypt)
+- Catálogo de filmes e séries populares, mais bem avaliados e em cartaz
+- Busca por título direto na API do TMDB
+- Lista pessoal organizada por abas (Filmes / Séries)
+- Avaliação em estrelas (1 a 5) e comentários pessoais para cada item
+- Edição de perfil (dados pessoais e senha)
+- Estatísticas do perfil (total de itens, assistidos, assistindo, etc.)
 
-### 2. Configurar `application.yaml`
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://127.0.0.1:5432/cinetrack_db
-    username: SEU_USUARIO
-    password: SUA_SENHA
+---
 
-tmdb:
-  api:
-    key: SUA_CHAVE_TMDB
-```
+## 🛠️ Tecnologias
 
-### 3. Obter chave da TMDB (gratuito)
-1. Crie conta em https://www.themoviedb.org/signup
-2. Vá em **Configurações → API → Criar chave**
-3. Cole a **API Key (v3)** no `application.yaml`
+- **Java 21** + **Spring Boot**
+- **Thymeleaf** (templates)
+- **PostgreSQL** + **JdbcTemplate**
+- **TMDB API** (catálogo de filmes e séries)
+- HTML, CSS e JavaScript puro
 
-### 4. Rodar
+---
+
+## ▶️ Como executar
+
+1. Crie um banco PostgreSQL e configure as credenciais em `application.yml`
+2. Configure sua chave da API do TMDB em `application.yml`
+3. Execute o projeto:
+
 ```bash
-mvn spring-boot:run
+./mvnw spring-boot:run
 ```
-Acesse: **http://localhost:8080**
+
+4. Acesse: **http://localhost:8080**
+
+> As tabelas do banco são criadas automaticamente na primeira execução.
 
 ---
 
-## 🗂 Estrutura (padrão AulaBD)
+## 📁 Estrutura do projeto
 
 ```
-model/
-  Usuario.java          ← POJO + converterRegistros()
-  UsuarioDAO.java       ← @Repository + JdbcTemplate + SQL puro
-  UsuarioService.java   ← @Service
-  MinhaLista.java       ← POJO + converterRegistros()
-  MinhaListaDAO.java    ← @Repository + JdbcTemplate + SQL puro
-  MinhaListaService.java← @Service
-  TmdbService.java      ← consome API TMDB
+src/main/java/com/filmes/cinetrack/
+├── controller/        # Controlador principal (rotas)
+└── model/              # Entidades, DAOs e Services
 
-controller/
-  MainController.java   ← @Controller + ApplicationContext.getBean()
-
-resources/
-  application.yaml
-  schema-postgresql.sql
-  templates/  login · registro · catalogo · lista · formeditar
-  static/css/ style.css
+src/main/resources/
+├── templates/          # Páginas Thymeleaf
+├── static/css/         # Estilos
+└── schema-postgresql.sql
 ```
 
 ---
 
-## 🔑 Rotas
-
-| Método | Rota | Descrição |
-|---|---|---|
-| GET | `/` | Redireciona para login ou catálogo |
-| GET/POST | `/login` | Login |
-| GET/POST | `/registro` | Cadastro |
-| GET | `/logout` | Encerra sessão |
-| GET | `/catalogo` | Grid de filmes/séries populares |
-| GET | `/catalogo?busca=xxx` | Busca na TMDB |
-| POST | `/catalogo/adicionar` | Adiciona item à lista |
-| GET | `/lista` | Minha lista pessoal |
-| GET/POST | `/lista/{id}/editar` | Editar status e nota |
-| POST | `/lista/{id}/excluir` | Remover da lista |
+Projeto acadêmico desenvolvido para a disciplina de Banco de Dados.

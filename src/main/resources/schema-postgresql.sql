@@ -13,5 +13,8 @@ CREATE TABLE IF NOT EXISTS minha_lista (
     tipo        VARCHAR(10),
     poster_path VARCHAR(255),
     status      VARCHAR(50)  DEFAULT 'quero assistir',
-    nota        TEXT
+    nota        TEXT,
+    avaliacao   INTEGER      DEFAULT 0
 );
+
+ALTER TABLE minha_lista ADD COLUMN IF NOT EXISTS avaliacao INTEGER DEFAULT 0;

@@ -7,7 +7,6 @@
 </head>
 <body>
 
-<!-- NAVBAR -->
 <nav class="navbar">
     <div class="navbar-brand">🎬 CineTrack</div>
     <div class="navbar-links">
@@ -16,62 +15,290 @@
         <a th:href="@{/lista}"   class="nav-link active">📋 Minha Lista</a>
         <a th:href="@{/perfil}"  class="nav-link">👤 Perfil</a>
         <span class="nav-user"   th:text="${usuario.nome}"></span>
-        <a th:href="@{/logout}"   class="btn-logout">Sair</a>
+        <a th:href="@{/logout}"  class="btn-logout">Sair</a>
     </div>
 </nav>
 
 <main class="container">
     <div class="lista-header">
-        <h2 class="section-title">📋 Minha Lista</h2>
-        <a th:href="@{/catalogo}" class="btn-limpar">+ Adicionar mais</a>
+        <h2 class="section-title" style="margin-bottom:0">📋 Minha Lista</h2>
+        <a th:href="@{/filmes}" class="btn-limpar">+ Adicionar mais</a>
+    </div>
+
+    <!-- Abas -->
+    <div class="tabs-bar">
+        <button class="tab-btn active" data-tab="filmes">
+            🎬 Filmes <span class="tab-count" id="count-filmes">0</span>
+        </button>
+        <button class="tab-btn" data-tab="series">
+            📺 Séries <span class="tab-count" id="count-series">0</span>
+        </button>
     </div>
 
     <p th:if="${itens.isEmpty()}" class="empty-msg">
-        Sua lista está vazia. <a th:href="@{/catalogo}">Explorar catálogo</a>
+        Sua lista está vazia. <a th:href="@{/filmes}">Explorar catálogo</a>
     </p>
 
-    <div class="grid" th:unless="${itens.isEmpty()}">
-        <article class="card card-lista" th:each="item : ${itens}">
+    <!-- Tab Filmes -->
+    <div class="tab-content active" id="tab-filmes" th:unless="${itens.isEmpty()}">
+        <div class="lista-grid" id="grid-filmes">
+            <article class="lista-card" th:each="item : ${itens}" th:if="${item.tipo == 'movie'}"
+                     th:data-tmdb-id="${item.tmdbId}"
+                     th:data-tipo="${item.tipo}"
+                     th:data-edit-url="'/lista/' + ${item.id} + '/editar'"
+                     th:data-titulo="${item.titulo}"
+                     th:data-comentario="${item.nota}"
+                     th:data-avaliacao="${item.avaliacao}"
+                     th:data-status="${item.status}"
+                     th:data-poster="${item.posterPath}"
+                     th:data-excluir-url="'/lista/' + ${item.id} + '/excluir'"
+                     style="cursor:pointer">
 
-            <div class="card-poster">
-                <img th:if="${item.posterPath != null and !item.posterPath.isEmpty()}"
-                     th:src="'https://image.tmdb.org/t/p/w300' + ${item.posterPath}"
-                     th:alt="${item.titulo}" loading="lazy">
-                <div th:if="${item.posterPath == null or item.posterPath.isEmpty()}" class="no-poster">🎬</div>
-                <span class="badge badge-tipo" th:text="${item.tipo == 'movie' ? 'Filme' : 'Série'}"></span>
-            </div>
-
-            <div class="card-info">
-                <p class="card-titulo" th:text="${item.titulo}"></p>
-
-                <span class="status-badge"
-                      th:classappend="${item.status == 'assistido'  ? ' status-done'     :
-                                        item.status == 'assistindo' ? ' status-watching' :
-                                                                       ' status-want'}"
-                      th:text="${item.status}">
-                </span>
-
-                <p class="nota-texto"
-                   th:if="${item.nota != null and !item.nota.isEmpty()}"
-                   th:text="'📝 ' + ${item.nota}">
-                </p>
-
-                <div class="card-actions">
-                    <!-- Editar → vai para formeditar.html (padrão PathVariable do repositório) -->
-                    <a th:href="'/lista/' + ${item.id} + '/editar'" class="btn-acao">✏️ Editar</a>
-
-                    <!-- Excluir -->
-                    <form action="#"
-                          th:action="'/lista/' + ${item.id} + '/excluir'"
-                          method="post" style="display:inline">
-                        <input type="submit" value="🗑 Remover" class="btn-acao btn-danger"
-                               onclick="return confirm('Remover da lista?')">
-                    </form>
+                <div class="lista-card-poster">
+                    <img th:if="${item.posterPath != null and !item.posterPath.isEmpty()}"
+                         th:src="'https://image.tmdb.org/t/p/w300' + ${item.posterPath}"
+                         th:alt="${item.titulo}" loading="lazy">
+                    <div th:if="${item.posterPath == null or item.posterPath.isEmpty()}" class="no-poster">🎬</div>
+                    <div class="poster-status-overlay"
+                         th:classappend="${item.status == 'assistido'  ? ' overlay-done'     :
+                                           item.status == 'assistindo' ? ' overlay-watching' : ' overlay-want'}">
+                        <span th:text="${item.status == 'assistido' ? '✓ Assistido' :
+                                         item.status == 'assistindo' ? '▶ Assistindo' : '⊕ Quero ver'}"></span>
+                    </div>
+                    <!-- Estrelas no poster -->
+                    <div class="poster-stars" th:if="${item.avaliacao > 0}">
+                        <span th:each="i : ${#numbers.sequence(1, 5)}"
+                              th:text="${i <= item.avaliacao ? '★' : '☆'}"
+                              th:classappend="${i <= item.avaliacao ? ' star-on' : ' star-off'}"></span>
+                    </div>
                 </div>
-            </div>
-        </article>
+
+                <div class="lista-card-info">
+                    <p class="lista-card-titulo" th:text="${item.titulo}"></p>
+                    <p class="lista-card-nota" th:if="${item.nota != null and !item.nota.isEmpty()}" th:text="${item.nota}"></p>
+                    <p class="lista-card-nota sem-nota" th:if="${item.nota == null or item.nota.isEmpty()}">Sem comentário</p>
+                </div>
+            </article>
+            <p class="empty-tab-msg" id="empty-filmes" style="display:none">
+                Nenhum filme na lista. <a th:href="@{/filmes}">Explorar filmes</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Tab Séries -->
+    <div class="tab-content" id="tab-series" th:unless="${itens.isEmpty()}">
+        <div class="lista-grid" id="grid-series">
+            <article class="lista-card" th:each="item : ${itens}" th:if="${item.tipo == 'tv'}"
+                     th:data-tmdb-id="${item.tmdbId}"
+                     th:data-tipo="${item.tipo}"
+                     th:data-edit-url="'/lista/' + ${item.id} + '/editar'"
+                     th:data-titulo="${item.titulo}"
+                     th:data-comentario="${item.nota}"
+                     th:data-avaliacao="${item.avaliacao}"
+                     th:data-status="${item.status}"
+                     th:data-poster="${item.posterPath}"
+                     th:data-excluir-url="'/lista/' + ${item.id} + '/excluir'"
+                     style="cursor:pointer">
+
+                <div class="lista-card-poster">
+                    <img th:if="${item.posterPath != null and !item.posterPath.isEmpty()}"
+                         th:src="'https://image.tmdb.org/t/p/w300' + ${item.posterPath}"
+                         th:alt="${item.titulo}" loading="lazy">
+                    <div th:if="${item.posterPath == null or item.posterPath.isEmpty()}" class="no-poster">📺</div>
+                    <div class="poster-status-overlay"
+                         th:classappend="${item.status == 'assistido'  ? ' overlay-done'     :
+                                           item.status == 'assistindo' ? ' overlay-watching' : ' overlay-want'}">
+                        <span th:text="${item.status == 'assistido' ? '✓ Assistido' :
+                                         item.status == 'assistindo' ? '▶ Assistindo' : '⊕ Quero ver'}"></span>
+                    </div>
+                    <div class="poster-stars" th:if="${item.avaliacao > 0}">
+                        <span th:each="i : ${#numbers.sequence(1, 5)}"
+                              th:text="${i <= item.avaliacao ? '★' : '☆'}"
+                              th:classappend="${i <= item.avaliacao ? ' star-on' : ' star-off'}"></span>
+                    </div>
+                </div>
+
+                <div class="lista-card-info">
+                    <p class="lista-card-titulo" th:text="${item.titulo}"></p>
+                    <p class="lista-card-nota" th:if="${item.nota != null and !item.nota.isEmpty()}" th:text="${item.nota}"></p>
+                    <p class="lista-card-nota sem-nota" th:if="${item.nota == null or item.nota.isEmpty()}">Sem comentário</p>
+                </div>
+            </article>
+            <p class="empty-tab-msg" id="empty-series" style="display:none">
+                Nenhuma série na lista. <a th:href="@{/series}">Explorar séries</a>
+            </p>
+        </div>
     </div>
 </main>
+
+<!-- ── MODAL ──────────────────────────────────────────────────────────────── -->
+<div class="modal" id="modal-detalhe" style="display:none" onclick="if(event.target===this)fecharModal()">
+    <div class="modal-box">
+        <button class="modal-close" onclick="fecharModal()">✕</button>
+
+        <!-- Loading -->
+        <div id="modal-loading" style="padding:3rem; text-align:center; color:var(--muted);">
+            <div class="spinner-inline"></div>
+            <p style="margin-top:1rem">Carregando...</p>
+        </div>
+
+        <!-- Conteúdo -->
+        <div id="modal-conteudo" style="display:none">
+            <div class="modal-body">
+                <img id="modal-poster" class="modal-poster" src="" alt="">
+                <div class="modal-info">
+                    <div>
+                        <span id="modal-badge" class="badge-tipo" style="position:static;display:inline-block;margin-bottom:.5rem"></span>
+                        <span id="modal-status-badge" class="status-badge" style="margin-left:.4rem"></span>
+                    </div>
+                    <h2 id="modal-titulo"></h2>
+                    <p class="modal-meta">
+                        <span id="modal-ano"></span>
+                        &nbsp;·&nbsp;
+                        <span class="star">★</span> <span id="modal-nota-tmdb"></span>
+                        <span style="color:var(--muted);font-size:.8rem"> (TMDB)</span>
+                    </p>
+
+                    <!-- Avaliação do usuário -->
+                    <div class="modal-user-rating">
+                        <span style="font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Sua avaliação</span>
+                        <div class="stars-display" id="modal-stars">
+                            <span class="star-icon" data-v="1">★</span>
+                            <span class="star-icon" data-v="2">★</span>
+                            <span class="star-icon" data-v="3">★</span>
+                            <span class="star-icon" data-v="4">★</span>
+                            <span class="star-icon" data-v="5">★</span>
+                        </div>
+                        <span id="modal-sem-avaliacao" style="font-size:.8rem;color:var(--muted)">Sem avaliação</span>
+                    </div>
+
+                    <p class="modal-desc" id="modal-descricao"></p>
+
+                    <!-- Comentário -->
+                    <div class="modal-comentario-box" id="modal-comentario-box" style="display:none">
+                        <span style="font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">💬 Comentário</span>
+                        <p id="modal-comentario-texto" style="font-size:.88rem;color:var(--text);margin-top:.3rem;font-style:italic"></p>
+                    </div>
+
+                    <div class="modal-actions">
+                        <a id="modal-btn-editar" href="#" class="btn-submit" style="margin-top:0">✏ Editar</a>
+                        <form id="modal-form-excluir" method="post" style="display:inline">
+                            <button type="submit" class="btn-limpar"
+                                    onclick="return confirm('Remover da lista?')"
+                                    style="margin-top:0;color:var(--primary);border-color:var(--primary)">
+                                ✕ Remover
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Contagem abas
+    const filmes = document.querySelectorAll('#grid-filmes .lista-card');
+    const series = document.querySelectorAll('#grid-series .lista-card');
+    document.getElementById('count-filmes').textContent = filmes.length;
+    document.getElementById('count-series').textContent = series.length;
+    if (filmes.length === 0) document.getElementById('empty-filmes').style.display = 'block';
+    if (series.length === 0) document.getElementById('empty-series').style.display = 'block';
+
+    // Abas
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        });
+    });
+
+    // Clique no card
+    document.querySelectorAll('.lista-card').forEach(card => {
+        card.addEventListener('click', () => abrirModal(card));
+    });
+});
+
+function abrirModal(card) {
+    const modal = document.getElementById('modal-detalhe');
+    modal.style.display = 'flex';
+    document.getElementById('modal-loading').style.display = 'block';
+    document.getElementById('modal-conteudo').style.display = 'none';
+
+    const tmdbId    = card.dataset.tmdbId;
+    const tipo      = card.dataset.tipo;
+    const editUrl   = card.dataset.editUrl;
+    const excluirUrl = card.dataset.excluirUrl;
+    const comentario = card.dataset.comentario || '';
+    const avaliacao  = parseInt(card.dataset.avaliacao) || 0;
+    const status     = card.dataset.status || '';
+
+    // Botões
+    document.getElementById('modal-btn-editar').href = editUrl;
+    document.getElementById('modal-form-excluir').action = excluirUrl;
+
+    // Comentário
+    const comentarioBox = document.getElementById('modal-comentario-box');
+    if (comentario && comentario.trim()) {
+        comentarioBox.style.display = 'block';
+        document.getElementById('modal-comentario-texto').textContent = '"' + comentario + '"';
+    } else {
+        comentarioBox.style.display = 'none';
+    }
+
+    // Estrelas do usuário
+    const stars = document.querySelectorAll('#modal-stars .star-icon');
+    const semAval = document.getElementById('modal-sem-avaliacao');
+    stars.forEach(s => {
+        s.classList.toggle('star-on',  parseInt(s.dataset.v) <= avaliacao);
+        s.classList.toggle('star-off', parseInt(s.dataset.v) >  avaliacao);
+    });
+    semAval.style.display = avaliacao === 0 ? 'inline' : 'none';
+
+    // Status badge
+    const statusBadge = document.getElementById('modal-status-badge');
+    const statusMap = {
+        'assistido':    ['status-done',     '✓ Assistido'],
+        'assistindo':   ['status-watching', '▶ Assistindo'],
+        'quero assistir': ['status-want',   '⊕ Quero ver'],
+    };
+    const [cls, label] = statusMap[status] || ['status-want', status];
+    statusBadge.className = 'status-badge ' + cls;
+    statusBadge.textContent = label;
+
+    // Busca TMDB
+    fetch('/api/detalhe?tmdbId=' + tmdbId + '&tipo=' + tipo)
+        .then(r => r.json())
+        .then(d => {
+            document.getElementById('modal-poster').src =
+                d.posterPath ? 'https://image.tmdb.org/t/p/w342' + d.posterPath : '';
+            document.getElementById('modal-titulo').textContent    = d.titulo || card.dataset.titulo;
+            document.getElementById('modal-ano').textContent       = d.ano || '—';
+            document.getElementById('modal-nota-tmdb').textContent = d.nota ? d.nota.toFixed(1) : '—';
+            document.getElementById('modal-descricao').textContent = d.descricao || 'Sem descrição.';
+            document.getElementById('modal-badge').textContent     = tipo === 'movie' ? 'Filme' : 'Série';
+            document.getElementById('modal-badge').style.background = tipo === 'movie' ? 'var(--primary)' : 'var(--accent)';
+
+            document.getElementById('modal-loading').style.display  = 'none';
+            document.getElementById('modal-conteudo').style.display = 'block';
+        })
+        .catch(() => {
+            document.getElementById('modal-titulo').textContent  = card.dataset.titulo;
+            document.getElementById('modal-descricao').textContent = 'Não foi possível carregar os detalhes.';
+            document.getElementById('modal-loading').style.display  = 'none';
+            document.getElementById('modal-conteudo').style.display = 'block';
+        });
+}
+
+function fecharModal() {
+    document.getElementById('modal-detalhe').style.display = 'none';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharModal(); });
+</script>
 
 </body>
 </html>

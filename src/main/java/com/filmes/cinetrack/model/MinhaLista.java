@@ -9,6 +9,7 @@ public class MinhaLista {
     private int    usuarioId;
     private long   tmdbId;
     private String titulo, tipo, posterPath, status, nota;
+    private int    avaliacao; // 0-5 estrelas
 
     // Início do form
     public MinhaLista() {}
@@ -23,11 +24,12 @@ public class MinhaLista {
         this.posterPath = posterPath;
         this.status     = status;
         this.nota       = nota;
+        this.avaliacao  = 0;
     }
 
     // Select
     public MinhaLista(int id, int usuarioId, long tmdbId, String titulo,
-                      String tipo, String posterPath, String status, String nota) {
+                      String tipo, String posterPath, String status, String nota, int avaliacao) {
         this.id         = id;
         this.usuarioId  = usuarioId;
         this.tmdbId     = tmdbId;
@@ -36,16 +38,18 @@ public class MinhaLista {
         this.posterPath = posterPath;
         this.status     = status;
         this.nota       = nota;
+        this.avaliacao  = avaliacao;
     }
 
-    public int    getId()         { return id; }
-    public int    getUsuarioId()  { return usuarioId; }
-    public long   getTmdbId()     { return tmdbId; }
-    public String getTitulo()     { return titulo; }
-    public String getTipo()       { return tipo; }
-    public String getPosterPath() { return posterPath; }
-    public String getStatus()     { return status; }
-    public String getNota()       { return nota; }
+    public int    getId()          { return id; }
+    public int    getUsuarioId()   { return usuarioId; }
+    public long   getTmdbId()      { return tmdbId; }
+    public String getTitulo()      { return titulo; }
+    public String getTipo()        { return tipo; }
+    public String getPosterPath()  { return posterPath; }
+    public String getStatus()      { return status; }
+    public String getNota()        { return nota; }
+    public int    getAvaliacao()   { return avaliacao; }
 
     public void setId(int id)                { this.id         = id; }
     public void setUsuarioId(int usuarioId)  { this.usuarioId  = usuarioId; }
@@ -55,16 +59,18 @@ public class MinhaLista {
     public void setPosterPath(String p)      { this.posterPath = p; }
     public void setStatus(String status)     { this.status     = status; }
     public void setNota(String nota)         { this.nota       = nota; }
+    public void setAvaliacao(int avaliacao)  { this.avaliacao  = avaliacao; }
 
-    public static MinhaLista converterRegistros(Map<String, Object> registros) {
-        int    id         = (int)    registros.get("id");
-        int    usuarioId  = (int)    registros.get("usuario_id");
-        long   tmdbId     = ((Number) registros.get("tmdb_id")).longValue();
-        String titulo     = (String) registros.get("titulo");
-        String tipo       = (String) registros.get("tipo");
-        String posterPath = (String) registros.get("poster_path");
-        String status     = (String) registros.get("status");
-        String nota       = (String) registros.get("nota");
-        return new MinhaLista(id, usuarioId, tmdbId, titulo, tipo, posterPath, status, nota);
+    public static MinhaLista converterRegistros(Map<String, Object> r) {
+        int    id         = (int)     r.get("id");
+        int    usuarioId  = (int)     r.get("usuario_id");
+        long   tmdbId     = ((Number) r.get("tmdb_id")).longValue();
+        String titulo     = (String)  r.get("titulo");
+        String tipo       = (String)  r.get("tipo");
+        String posterPath = (String)  r.get("poster_path");
+        String status     = (String)  r.get("status");
+        String nota       = (String)  r.get("nota");
+        int    avaliacao  = r.get("avaliacao") != null ? ((Number) r.get("avaliacao")).intValue() : 0;
+        return new MinhaLista(id, usuarioId, tmdbId, titulo, tipo, posterPath, status, nota, avaliacao);
     }
 }

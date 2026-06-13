@@ -1,36 +1,121 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>CineTrack — Editar Item</title>
+    <title>CineTrack — Editar</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body class="auth-page">
+<body>
 
-<div class="auth-container">
-    <div class="auth-card">
-        <div class="auth-logo">✏️ Editar</div>
-        <h2 class="auth-title" th:text="${item.titulo}"></h2>
-
-        <!-- Igual ao formupdcliente.html do repositório: PathVariable + th:object + th:field -->
-        <form action="#" th:action="'/lista/' + ${id} + '/editar'" method="post" th:object="${item}">
-
-            Status:
-            <select th:field="*{status}" class="input-select">
-                <option value="quero assistir">Quero assistir</option>
-                <option value="assistindo">Assistindo</option>
-                <option value="assistido">Assistido</option>
-            </select><br>
-
-            Nota:
-            <textarea th:field="*{nota}" class="input-textarea"
-                      placeholder="Adicionar uma nota..."></textarea><br>
-
-            <input type="submit" value="Salvar" class="btn-submit">
-            <a th:href="@{/lista}" class="btn-limpar">Cancelar</a>
-        </form>
+<nav class="navbar">
+    <div class="navbar-brand">🎬 CineTrack</div>
+    <div class="navbar-links">
+        <a th:href="@{/filmes}"  class="nav-link">🎬 Filmes</a>
+        <a th:href="@{/series}"  class="nav-link">📺 Séries</a>
+        <a th:href="@{/lista}"   class="nav-link active">📋 Minha Lista</a>
+        <a th:href="@{/perfil}"  class="nav-link">👤 Perfil</a>
+        <a th:href="@{/logout}"  class="btn-logout">Sair</a>
     </div>
-</div>
+</nav>
+
+<main class="container">
+    <div class="editar-wrapper">
+
+        <!-- Poster -->
+        <div class="editar-poster-col">
+            <img th:if="${item.posterPath != null and !item.posterPath.isEmpty()}"
+                 th:src="'https://image.tmdb.org/t/p/w342' + ${item.posterPath}"
+                 th:alt="${item.titulo}" class="editar-poster-img">
+            <div th:if="${item.posterPath == null or item.posterPath.isEmpty()}"
+                 class="editar-poster-placeholder">🎬</div>
+            <div class="editar-tipo-badge"
+                 th:classappend="${item.tipo == 'movie' ? ' badge-movie' : ' badge-tv'}"
+                 th:text="${item.tipo == 'movie' ? 'Filme' : 'Série'}"></div>
+        </div>
+
+        <!-- Formulário -->
+        <div class="editar-form-col">
+            <h2 class="editar-titulo" th:text="${item.titulo}"></h2>
+
+            <form action="#" th:action="'/lista/' + ${id} + '/editar'" method="post" th:object="${item}">
+
+                <!-- Status -->
+                <p class="editar-label">Status</p>
+                <div class="status-selector">
+                    <label class="status-option">
+                        <input type="radio" th:field="*{status}" value="quero assistir">
+                        <span class="status-pill pill-want">⊕ Quero assistir</span>
+                    </label>
+                    <label class="status-option">
+                        <input type="radio" th:field="*{status}" value="assistindo">
+                        <span class="status-pill pill-watching">▶ Assistindo</span>
+                    </label>
+                    <label class="status-option">
+                        <input type="radio" th:field="*{status}" value="assistido">
+                        <span class="status-pill pill-done">✓ Assistido</span>
+                    </label>
+                </div>
+
+                <!-- Avaliação por estrelas -->
+                <p class="editar-label" style="margin-top:1.25rem">Avaliação</p>
+                <div class="star-picker" id="star-picker">
+                    <span class="star-pick" data-v="1">★</span>
+                    <span class="star-pick" data-v="2">★</span>
+                    <span class="star-pick" data-v="3">★</span>
+                    <span class="star-pick" data-v="4">★</span>
+                    <span class="star-pick" data-v="5">★</span>
+                    <span class="star-clear" id="star-clear">✕ Limpar</span>
+                </div>
+                <input type="hidden" th:field="*{avaliacao}" id="avaliacao-input">
+
+                <!-- Comentário -->
+                <p class="editar-label" style="margin-top:1.25rem">Comentário</p>
+                <textarea th:field="*{nota}" class="editar-textarea"
+                          placeholder="O que você achou? Deixe sua impressão..."></textarea>
+
+                <div class="editar-actions">
+                    <input type="submit" value="Salvar alterações" class="btn-submit">
+                    <a th:href="@{/lista}" class="btn-limpar">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const picks   = document.querySelectorAll('.star-pick');
+    const input   = document.getElementById('avaliacao-input');
+    const clearBtn = document.getElementById('star-clear');
+    let current   = parseInt(input.value) || 0;
+
+    function render(val) {
+        picks.forEach(s => {
+            s.classList.toggle('star-pick-on',  parseInt(s.dataset.v) <= val);
+            s.classList.toggle('star-pick-off', parseInt(s.dataset.v) >  val);
+        });
+        clearBtn.style.display = val > 0 ? 'inline' : 'none';
+    }
+
+    render(current);
+
+    picks.forEach(s => {
+        s.addEventListener('mouseover', () => render(parseInt(s.dataset.v)));
+        s.addEventListener('mouseout',  () => render(current));
+        s.addEventListener('click', () => {
+            current = parseInt(s.dataset.v);
+            input.value = current;
+            render(current);
+        });
+    });
+
+    clearBtn.addEventListener('click', () => {
+        current = 0;
+        input.value = 0;
+        render(0);
+    });
+});
+</script>
 
 </body>
 </html>

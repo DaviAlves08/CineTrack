@@ -54,6 +54,23 @@ public class UsuarioDAO {
         return count != null && count > 0;
     }
 
+    public void atualizar(Usuario u) {
+        String sql = "UPDATE usuario SET nome = ?, email = ? WHERE id = ?";
+        Object[] obj = new Object[3];
+        obj[0] = u.getNome();
+        obj[1] = u.getEmail();
+        obj[2] = u.getId();
+        jdbc.update(sql, obj);
+    }
+
+    public void atualizarSenha(Usuario u) {
+        String sql = "UPDATE usuario SET senha = ? WHERE id = ?";
+        Object[] obj = new Object[2];
+        obj[0] = u.getSenha();
+        obj[1] = u.getId();
+        jdbc.update(sql, obj);
+    }
+
     public List<Usuario> obterTodos() {
         String sql = "SELECT * FROM usuario";
         List<Map<String, Object>> listaRegistros = jdbc.queryForList(sql);

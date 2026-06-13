@@ -8,7 +8,11 @@ spring:
     username: postgres
     password: root
     driverClassName: org.postgresql.Driver
-
+  thymeleaf:
+    cache: false
+  devtools:
+    restart:
+      enabled: true
   jpa:
     hibernate:
       ddl-auto: create-drop
