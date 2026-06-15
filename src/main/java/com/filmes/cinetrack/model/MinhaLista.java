@@ -2,7 +2,6 @@ package com.filmes.cinetrack.model;
 
 import java.util.Map;
 
-// POJO - Plain Old Java Object
 public class MinhaLista {
 
     private int    id;
@@ -11,10 +10,8 @@ public class MinhaLista {
     private String titulo, tipo, posterPath, status, nota;
     private int    avaliacao; // 0-5 estrelas
 
-    // Início do form
     public MinhaLista() {}
 
-    // Insert
     public MinhaLista(int usuarioId, long tmdbId, String titulo,
                       String tipo, String posterPath, String status, String nota) {
         this.usuarioId  = usuarioId;
@@ -27,7 +24,6 @@ public class MinhaLista {
         this.avaliacao  = 0;
     }
 
-    // Select
     public MinhaLista(int id, int usuarioId, long tmdbId, String titulo,
                       String tipo, String posterPath, String status, String nota, int avaliacao) {
         this.id         = id;

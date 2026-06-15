@@ -35,7 +35,6 @@ public class MainController {
         return session.getAttribute("usuario") != null ? "redirect:/filmes" : "redirect:/login";
     }
 
-    // ── AUTH ──────────────────────────────────────────────────────────────────
     @GetMapping("/login")
     public String loginPage(HttpSession session) {
         if (session.getAttribute("usuario") != null) return "redirect:/filmes";
@@ -81,7 +80,7 @@ public class MainController {
         return "redirect:/login";
     }
 
-    // ── FILMES ────────────────────────────────────────────────────────────────
+   
     @GetMapping("/filmes")
     public String filmes(@RequestParam(required = false) String filtro,
                          @RequestParam(required = false) String busca,
@@ -102,7 +101,7 @@ public class MainController {
         return "filmes";
     }
 
-    // ── SÉRIES ────────────────────────────────────────────────────────────────
+   
     @GetMapping("/series")
     public String series(@RequestParam(required = false) String filtro,
                          @RequestParam(required = false) String busca,
@@ -123,7 +122,7 @@ public class MainController {
         return "series";
     }
 
-    // ── ADICIONAR ─────────────────────────────────────────────────────────────
+
     @PostMapping("/adicionar")
     public String adicionar(@RequestParam long tmdbId, @RequestParam String titulo,
                             @RequestParam String tipo,
@@ -139,7 +138,7 @@ public class MainController {
         return "redirect:" + origem;
     }
 
-    // ── LISTA ─────────────────────────────────────────────────────────────────
+   
     @GetMapping("/lista")
     public String lista(HttpSession session, Model model) {
         if (session.getAttribute("usuario") == null) return "redirect:/login";
@@ -184,7 +183,6 @@ public class MainController {
         return "redirect:/lista";
     }
 
-    // ── PERFIL ────────────────────────────────────────────────────────────────
     @GetMapping("/perfil")
     public String perfil(HttpSession session, Model model) {
         if (session.getAttribute("usuario") == null) return "redirect:/login";
@@ -245,7 +243,7 @@ public class MainController {
         return "redirect:/perfil";
     }
 
-    // ── DETALHE AJAX ──────────────────────────────────────────────────────────
+    
     @GetMapping("/api/detalhe")
     @ResponseBody
     public java.util.Map<String, Object> detalheApi(@RequestParam long tmdbId,
@@ -256,7 +254,7 @@ public class MainController {
         return ts.detalhe(tmdbId, tipo);
     }
 
-    // ── CATÁLOGO ──────────────────────────────────────────────────────────────
+    
     @GetMapping("/catalogo")
     public String catalogo(HttpSession session) {
         if (session.getAttribute("usuario") == null) return "redirect:/login";

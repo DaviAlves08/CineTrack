@@ -2,23 +2,22 @@ package com.filmes.cinetrack.model;
 
 import java.util.Map;
 
-// POJO - Plain Old Java Object
+
 public class Usuario {
 
     private int id;
     private String nome, email, senha;
 
-    // Início do form
+
     public Usuario() {}
 
-    // Insert
+
     public Usuario(String nome, String email, String senha) {
         this.nome  = nome;
         this.email = email;
         this.senha = senha;
     }
 
-    // Select
     public Usuario(int id, String nome, String email, String senha) {
         this.id    = id;
         this.nome  = nome;

@@ -28,7 +28,7 @@ public class TmdbService {
     private final HttpClient   httpClient   = HttpClient.newHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // ── FILMES ───────────────────────────────────────────────────────────────
+   
     public List<Map<String, Object>> filmes(String filtro) {
         String endpoint = switch (filtro == null ? "popular" : filtro) {
             case "top_rated"   -> "/movie/top_rated";
@@ -36,11 +36,11 @@ public class TmdbService {
             case "upcoming"    -> "/movie/upcoming";
             default            -> "/movie/popular";
         };
-        // ✅ MELHORIA 5: API key enviada via header Authorization, não na URL
+        
         return chamar(BASE + endpoint + "?api_key=" + apiKey + "&" + LANG, "movie");
     }
 
-    // ── SÉRIES ───────────────────────────────────────────────────────────────
+    
     public List<Map<String, Object>> series(String filtro) {
         String endpoint = switch (filtro == null ? "popular" : filtro) {
             case "top_rated"    -> "/tv/top_rated";
@@ -51,7 +51,7 @@ public class TmdbService {
         return chamar(BASE + endpoint + "?api_key=" + apiKey + "&" + LANG, "tv");
     }
 
-    // ── BUSCA ────────────────────────────────────────────────────────────────
+   
     public List<Map<String, Object>> buscar(String query, String tipo) {
         try {
             String encoded = URLEncoder.encode(query, StandardCharsets.UTF_8);
@@ -68,10 +68,9 @@ public class TmdbService {
         }
     }
 
-    // ── MÉTODO INTERNO ───────────────────────────────────────────────────────
     private List<Map<String, Object>> chamar(String url, String tipoFixo) {
         try {
-            // ✅ MELHORIA 5: API key no header Authorization em vez da URL
+           
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .header("accept", "application/json")
@@ -121,7 +120,7 @@ public class TmdbService {
         }
     }
 
-    // ── DETALHE (para modal da lista) ────────────────────────────────────────
+   
     public Map<String, Object> detalhe(long tmdbId, String tipo) {
         String endpoint = tipo.equals("movie")
                 ? "/movie/" + tmdbId
@@ -159,4 +158,3 @@ public class TmdbService {
     }
 
 }
-// placeholder
