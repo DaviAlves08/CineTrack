@@ -4,6 +4,10 @@ CineTrack é uma aplicação web para catalogar filmes e séries, organizar uma 
 
 Os dados de filmes e séries (poster, descrição, nota, ano) são obtidos em tempo real através da API pública do **TMDB (The Movie Database)**.
 
+🔗 **Demo online:** [cinetrack-qqbt.onrender.com](https://cinetrack-qqbt.onrender.com/filmes)
+
+> O projeto está hospedado no plano gratuito do Render — se o site estiver "dormindo", a primeira requisição pode demorar de 30 a 60 segundos para responder.
+
 ---
 
 ## ✨ Funcionalidades
